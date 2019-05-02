@@ -2,8 +2,10 @@ package net.kwmt27.cameraxapp
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.Matrix
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.Surface
 import android.view.TextureView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
@@ -50,7 +52,19 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun updateTransform() {
-        // TODO
+        val matrix = Matrix()
+        val centerX = viewFinder.width / 2f
+        val centerY = viewFinder.height / 2f
+
+        val rotationDegrees = when (viewFinder.display.rotation) {
+            Surface.ROTATION_0 -> 0
+            Surface.ROTATION_90 -> 90
+            Surface.ROTATION_180 -> 180
+            Surface.ROTATION_270 -> 270
+            else -> return
+        }
+        matrix.postRotate(-rotationDegrees.toFloat(), centerX, centerY)
+        viewFinder.setTransform(matrix)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
