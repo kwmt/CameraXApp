@@ -5,11 +5,15 @@ import android.content.pm.PackageManager
 import android.graphics.Matrix
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.Surface
 import android.view.TextureView
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import java.io.File
+import java.lang.Exception
 
 private const val REQUEST_CODE_PERMISSIONS = 10
 
@@ -47,7 +51,35 @@ class MainActivity : AppCompatActivity() {
             updateTransform()
         }
 
-        CameraX.bindToLifecycle(this, preview)
+        // 写真撮影
+        val imageCaptureConfig = ImageCaptuureConfig.Builder().apply {
+            setTargetAspectRatio(Rationl(1, 1))
+            setCaptureMode(ImageCapture.CaptureMode.MIN_LATENCY)
+        }.build()
+        val imageCapture = ImageCapture(imageCaptureConfig)
+
+        findViewById<ImageButton>(R.id.capture_button).setOnClickListener {
+            val file = File(externalCacheDirs.first(), "${System.currentTimeMillis()}.jpg")
+            imageCapture.takePicture(file,
+                object : ImageCapture.OnImageSavaedListener {
+                    override fun onError(
+                        error: ImageCapture.UseCaseError,
+                        message: String, exc: Throwable?
+                    ) {
+                        val msg = "Photo capture failed: $message"
+                        Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+                        Log.e("CameraXApp", msg)
+                        exc?.printStackTrace()
+                    }
+
+                    override fun onImageSaved(file: File) {
+                        val msg = "Photo capture succeeded: ${file.absolutePath}"
+                        Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
+                        Log.d("CameraXApp", msg)
+                    }
+                })
+        }
+        CameraX.bindToLifecycle(this, preview, imageCapture)
     }
 
 
