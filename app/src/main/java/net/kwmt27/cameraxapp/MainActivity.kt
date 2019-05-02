@@ -33,8 +33,21 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startCamera() {
-        // TODO
+        val previewConfig = PreviewConfig.Builder().apply {
+            setTargetAspectRatio(Rationl(1, 1))
+            setTargetResolution(Size(640, 640))
+        }.build()
+
+        val preview = Preview(previewConfig)
+
+        preview.setOnPreviewOutputUpdateListener {
+            viewFinder.surfaceTexture = it.surfaceTexture
+            updateTransform()
+        }
+
+        CameraX.bindToLifecycle(this, preview)
     }
+
 
     private fun updateTransform() {
         // TODO
@@ -59,5 +72,4 @@ class MainActivity : AppCompatActivity() {
         }
         return true
     }
-
 }
